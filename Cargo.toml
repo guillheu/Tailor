@@ -1,0 +1,2 @@
+[workspace]
+members = ["tailor-cli",  "tailor-server-redis"]
