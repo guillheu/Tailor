@@ -1,7 +1,14 @@
 extern crate clap;
+extern crate reqwest;
 
-use clap::{Args, Parser, Subcommand};
+use clap::{Parser, Subcommand};
+use std::io;
+use std::fs::File;
 
+
+
+
+static GIT_URL: &'static str = "https://github.com/guillheu/Tailor";
 
 
 #[derive(Debug, Subcommand)]
@@ -34,21 +41,32 @@ struct Cli {
 
 fn main() {
     let args = Cli::parse();
-    match args.command {
-        Commands::Init{folder_name: n}      => init(&n),
+    let result = match args.command {
+        Commands::Init{folder_name: n}      => (init(&n)),
         Commands::Example{example_name: n}   => example(&n),
         Commands::Publish   => publish(),
     };
+    if result.is_err() {
+        println!("Invalid input : {:?}", result.err());
+    }
 }
 
-fn init(name: &str) {
-
+fn init(name: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let download_url = format!("{}{}", GIT_URL, "/raw/main/examples/default.zip");
+    let resp = reqwest::blocking::get(download_url)?.bytes()?;
+    // let mut zip = File::create(name)?;
+    // io::copy(&mut resp.bytes()?.as_ref(), &mut zip)?;
+    // let mut file = zip =
+    let mut zip = zip::ZipArchive::new(std::io::Cursor::new(resp))?;
+    println!("{:#?}", zip.len());
+    zip.extract(std::path::PathBuf::from(name))?;
+    Ok(())
 }
 
-fn example(name: &str) {
-
+fn example(name: &str)  -> Result<(), Box<dyn std::error::Error>>{
+    Ok(())
 }
 
-fn publish() {
-
+fn publish() -> Result<(), Box<dyn std::error::Error>> {
+    Ok(())
 }
