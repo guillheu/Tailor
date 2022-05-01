@@ -45,7 +45,7 @@ lazy_static::lazy_static! {
 
         //Registering helpers here
 
-        handlebars.register_helper("get-helper", Box::new(dynamic_metadata_fields::get_helper_helper));
+        handlebars.register_helper("get-timestamp-seconds", Box::new(dynamic_metadata_fields::get_remote_timestamp_seconds));
         handlebars.register_helper("static-string", Box::new(dynamic_metadata_fields::static_string_helper));
         assert!(handlebars.register_template_string("NFT", &*HTML_TEMPLATE_STR).is_ok());
         assert!(handlebars.register_template_string("metadata", &*METADATA_TEMPLATE_STR).is_ok());
