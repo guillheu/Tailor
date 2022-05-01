@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+    <img id="picture"/>
+</html>
+
+<script>
+    var sources = [
+        '/happy-red.png',
+        '/sad-blue.png'
+    ];
+    var img = document.getElementById('picture');
+    var random = Math.floor({{Timestamp}}/10);
+    console.log(random);
+    console.log(sources);
+    console.log(sources[random % 2]);
+    img.src = sources[random % 2];
+</script>
