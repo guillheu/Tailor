@@ -88,31 +88,31 @@ The HTML front-end has access to all the `attributes` declared in the metadata.<
 For instance, if this is our metadata file `metadata.json.hbs` :
 ```json
 [
-    {
-        "tokenID": 0,
-        "attributes": [
-            {
-                "trait_type": "Color",
-                "value": "green"
-            }
-        ],
-    },
-    {
-        "tokenID": 1,
-        "attributes": [
-            {
-                "trait_type": "Color",
-                "value": "red"
-            }
-        ],
-    }
+  {
+    "tokenID": 0,
+    "attributes": [
+      {
+        "trait_type": "Color",
+        "value": "green"
+      }
+    ],
+  },
+  {
+    "tokenID": 1,
+    "attributes": [
+      {
+        "trait_type": "Color",
+        "value": "red"
+      }
+    ],
+  }
 ]
 ```
 Then the following Dynamic font-end `nft.html.hbs` ...
 ```html
 <h1> I am {{Color}} </h1>
 ```
-... will replace {{Color}} with the attribute of `trait_type` "Color" of the requested NFT (based on the token ID given as query parameter `/?id=<tokenID>`).<br>
+... will replace `{{Color}}` with the attribute of `trait_type` "Color" of the requested NFT (based on the token ID given as query parameter `/?id=<tokenID>`).<br>
 Note that the metadata attribute names are case-sensitive.<br>
 <br>
 With this, you can include dynamic fields like `get-timestamp-seconds` in your metadata attributes, and then use them in your front-end.
