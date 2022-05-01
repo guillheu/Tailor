@@ -13,7 +13,7 @@ pub fn static_string_helper (_h: &Helper, _: &Handlebars, _: &Context, _rc: &mut
     Ok(())
 }
 
-pub fn get_remote_timestamp_seconds(h: &Helper, _: &Handlebars, _: &Context, _rc: &mut RenderContext, out: &mut dyn Output) -> HelperResult {
+pub fn get_remote_timestamp_seconds(_h: &Helper, _: &Handlebars, _: &Context, _rc: &mut RenderContext, out: &mut dyn Output) -> HelperResult {
     out.write(&format!("{}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs()))?;
     Ok(())
 }

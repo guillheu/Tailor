@@ -13,7 +13,7 @@ use rocket::response::{content};
 use std::net::{IpAddr, Ipv4Addr};
 use std::fs;
 use std::collections::HashMap;
-use std::io::{stdout, Write};
+// use std::io::{stdout, Write};
 
 #[derive(Debug, Serialize)]
 struct DynamicMetadataFields{
