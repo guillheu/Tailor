@@ -84,8 +84,8 @@ fn get_data(id: u32, request_data: DynamicMetadataFields) -> content::Html<Strin
 #[get("/")]
 fn get_directions() -> content::Html<String> {
 content::Html(r#"<h1>Greetings traveller</h1>
-<p>If you're looking for metadata, try the /metadata/<id> route.</p>
-<p>If you're looking for the NFT renders, the animations should be under /?id=<id>.</p>
+<p>If you're looking for metadata, try the /metadata/&lt;id&gt; route.</p>
+<p>If you're looking for the NFT renders, the animations should be under /?id=&lt;id&gt;.</p>
 <p>Otherwise, any static content (found in the static folder) should be directly accessible from the root.</p>
 "#.to_string())
 }
