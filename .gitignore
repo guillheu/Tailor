@@ -6,3 +6,4 @@ target
 **/*.rs.bk
 
 local_testing
+nodejs-example
