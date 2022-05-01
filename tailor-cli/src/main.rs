@@ -58,7 +58,7 @@ fn main() {
 
 fn init(name: &str) -> Result<(), Box<dyn std::error::Error>> {
     //DLing & extracting example zip
-    let download_url = format!("{}{}", GIT_URL, "/raw/main/examples/default.zip");
+    let download_url = format!("{}{}", GIT_URL, "/raw/main/examples/default/content.zip");
     let resp = reqwest::blocking::get(download_url)?.bytes()?;
     let mut zip = zip::ZipArchive::new(std::io::Cursor::new(resp))?;
     zip.extract(std::path::PathBuf::from(name))?;
@@ -74,7 +74,7 @@ fn init(name: &str) -> Result<(), Box<dyn std::error::Error>> {
 
 fn example(name: &str)  -> Result<(), Box<dyn std::error::Error>>{
     //DLing & extracting example zip
-    let download_url = format!("{}{}{}{}", GIT_URL, "/raw/main/examples/", name, ".zip");
+    let download_url = format!("{}{}{}{}", GIT_URL, "/raw/main/examples/", name, "/content.zip");
     let resp = reqwest::blocking::get(download_url)?.bytes()?;
     let mut zip = zip::ZipArchive::new(std::io::Cursor::new(resp))?;
     zip.extract(std::path::PathBuf::from(name))?;

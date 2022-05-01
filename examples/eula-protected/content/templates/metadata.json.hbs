@@ -1,0 +1,18 @@
+[
+    {
+        "description": "EULA Demo NFT",
+        {{#if headers.eula}}
+        "image": "https://{{headers.host}}/bon.png",
+        {{else}}
+        "image": "https://{{headers.host}}/pabon.png",
+        {{/if}}
+        "name": "EULA NFT #0",
+        "tokenID": 0,
+        "attributes": [
+          {
+            "trait_type": "AcceptedEULA",
+            "value":"{{headers.eula}}"
+          }
+        ]
+    }
+]
