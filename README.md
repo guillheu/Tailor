@@ -2,6 +2,7 @@
 The Tailor project is a suite of powertools for NFT metadata and front-end creation and management. It currently has 2 components :
 * `tailor-server-redis` : a project-agnostic redistributable template-based HTTP server.
 * `tailor-cli` : a simple utility that will generate and ([eventually](#roadmap)) publish NFT projects based on `tailor-server-redis`.
+* Early overview video: https://www.loom.com/share/3ea0ae0a646e458380492111bf09db1d
 
 ## Disclaimer
 This project is by no means completed and most its features are still being fleshed out.
