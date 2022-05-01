@@ -81,7 +81,14 @@ fn get_data(id: u32, request_data: DynamicMetadataFields) -> content::Html<Strin
     content::Html(r)
 }
 
-
+#[get("/")]
+fn get_directions() -> content::Html<String> {
+content::Html(r#"<h1>Greetings traveller</h1>
+<p>If you're looking for metadata, try the /metadata/<id> route.</p>
+<p>If you're looking for the NFT renders, the animations should be under /?id=<id>.</p>
+<p>Otherwise, any static content (found in the static folder) should be directly accessible from the root.</p>
+"#.to_string())
+}
 
 #[launch]
 fn rocket() -> _ {
@@ -89,6 +96,6 @@ fn rocket() -> _ {
     config.port = 8080;
     config.address = IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0));
     rocket::custom(config)
-        .mount("/", routes![get_metadata, get_data])
+        .mount("/", routes![get_metadata, get_data, get_directions])
         .mount("/", FileServer::from("static"))
 }
