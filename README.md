@@ -6,5 +6,5 @@ Cargo is required to install `tailor-cli`
 
 ## Installation
 ```shell
-cargo install --git https://github.com/guillheu/Tailor.git tailor-cli tailor-server-redis
+cargo install --git https://github.com/guillheu/Tailor.git tailor-cli
 ```
