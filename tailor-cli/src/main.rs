@@ -73,6 +73,18 @@ fn init(name: &str) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn example(name: &str)  -> Result<(), Box<dyn std::error::Error>>{
+    //DLing & extracting example zip
+    let download_url = format!("{}{}{}{}", GIT_URL, "/raw/main/examples/", name, ".zip");
+    let resp = reqwest::blocking::get(download_url)?.bytes()?;
+    let mut zip = zip::ZipArchive::new(std::io::Cursor::new(resp))?;
+    zip.extract(std::path::PathBuf::from(name))?;
+
+
+    //DLing redistributable server binary
+    let download_url = format!("{}{}", GIT_URL, "/raw/main/exec/tailor-server-redis");
+    let resp = reqwest::blocking::get(download_url)?.bytes()?;
+    let mut file = File::create(format!("{}/tailor-server-redis", name))?;
+    file.write(resp.as_ref())?;
     Ok(())
 }
 
