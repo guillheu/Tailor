@@ -12,24 +12,25 @@ use rocket::response::{content};
 
 use std::net::{IpAddr, Ipv4Addr};
 use std::fs;
-
+use std::collections::HashMap;
+use std::io::{stdout, Write};
 
 #[derive(Debug, Serialize)]
-struct DynamicMetadataFields<'a>{
-    host: &'a str,
+struct DynamicMetadataFields{
+    headers: HashMap<String, String>,
 }
 
 
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for DynamicMetadataFields<'r> {
+impl<'r> FromRequest<'r> for DynamicMetadataFields {
     type Error = ();
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        let host_header = match req.headers().get_one("Host") {
-            Some(h) => h,
-            None => return Outcome::Forward(()),
-        };
-        Outcome::Success(DynamicMetadataFields{host: host_header})
+        let mut map = HashMap::new();
+        for header in req.headers().iter() {
+            map.insert(header.name().to_string(), header.value().to_string());
+        }
+        Outcome::Success(DynamicMetadataFields{headers: map})
     }
 }
 
@@ -76,7 +77,7 @@ fn get_data(id: u32, request_data: DynamicMetadataFields) -> content::Html<Strin
     let attributes = json!(map);
 
     // let r = ATTRIBUTES.to_string();
-    let r = HANDLEBARS.render("NFT", &attributes[id.to_string()]).unwrap();
+    let r = HANDLEBARS.render("NFT", &(attributes[id.to_string()])).unwrap();
     content::Html(r)
 }
 
