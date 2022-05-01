@@ -8,3 +8,5 @@ Cargo is required to install `tailor-cli`
 ```shell
 cargo install --git https://github.com/guillheu/Tailor.git tailor-cli tailor-server-redis
 ```
+
+add `--force` to update
