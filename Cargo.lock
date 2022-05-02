@@ -1797,11 +1797,12 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "reqwest",
+ "tailor-server",
  "zip",
 ]
 
 [[package]]
-name = "tailor-server-redis"
+name = "tailor-server"
 version = "0.1.0"
 dependencies = [
  "handlebars",

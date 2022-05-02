@@ -2,8 +2,10 @@
 name = "tailor-cli"
 version = "0.1.0"
 edition = "2021"
+author = "Guillaume Heu"
 
 [dependencies]
 clap = { version = "3.1.6", features = ["derive"] }
 reqwest = {version= "0.11", features = ["blocking", "stream"] }
 zip = "0.6.2"
+tailor-server = { path = "../tailor-server" }

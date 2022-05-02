@@ -7,7 +7,7 @@ use serde_json::{Value, Map};
 use handlebars::{Handlebars};
 use rocket::request::{FromRequest, Request, Outcome};
 use rocket::fs::{FileServer};
-use rocket::{Config};
+use rocket::{Rocket, Build, Config};
 use rocket::response::{content};
 
 use std::net::{IpAddr, Ipv4Addr};
@@ -53,6 +53,19 @@ lazy_static::lazy_static! {
     };
 }
 
+
+
+pub fn run() -> Rocket<Build> {
+    let mut config = Config::release_default();
+    config.port = 8080;
+    config.address = IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0));
+    rocket::custom(config)
+        .mount("/", routes![get_metadata, get_data, get_directions])
+        .mount("/", FileServer::from("static"))
+}
+
+
+
 #[get("/metadata/<id>")]
 fn get_metadata(id: &str, dynamic_metadata_fields: DynamicMetadataFields) -> content::Json<String> {
 
@@ -88,14 +101,4 @@ content::Html(r#"<h1>Greetings traveller</h1>
 <p>If you're looking for the NFT renders, the animations should be under /?id=&lt;id&gt;.</p>
 <p>Otherwise, any static content (found in the static folder) should be directly accessible from the root.</p>
 "#.to_string())
-}
-
-#[launch]
-fn rocket() -> _ {
-    let mut config = Config::release_default();
-    config.port = 8080;
-    config.address = IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0));
-    rocket::custom(config)
-        .mount("/", routes![get_metadata, get_data, get_directions])
-        .mount("/", FileServer::from("static"))
 }
