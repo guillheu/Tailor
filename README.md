@@ -12,7 +12,7 @@ Cargo is required to install `tailor-cli`
 
 ## Installation
 ```shell
-cargo install --git https://github.com/guillheu/Tailor.git tailor-cli
+cargo install --git https://github.com/guillheu/Tailor.git tailor-cli tailor-server
 ```
 
 add `--force` to update

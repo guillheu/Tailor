@@ -2,8 +2,9 @@ extern crate clap;
 extern crate reqwest;
 
 use clap::{Parser, Subcommand};
-use std::fs::File;
-use std::io::Write;
+use std::fs::copy;
+use std::env::current_exe;
+use std::path::PathBuf;
 
 
 
@@ -57,37 +58,38 @@ fn main() {
 }
 
 fn init(name: &str) -> Result<(), Box<dyn std::error::Error>> {
-    //DLing & extracting example zip
-    let download_url = format!("{}{}", GIT_URL, "/raw/main/examples/default/content.zip");
-    let resp = reqwest::blocking::get(download_url)?.bytes()?;
-    let mut zip = zip::ZipArchive::new(std::io::Cursor::new(resp))?;
-    zip.extract(std::path::PathBuf::from(name))?;
-
-
-    //DLing redistributable server binary
-    let download_url = format!("{}{}", GIT_URL, "/raw/main/exec/tailor-server-redis");
-    let resp = reqwest::blocking::get(download_url)?.bytes()?;
-    let mut file = File::create(format!("{}/tailor-server-redis", name))?;
-    file.write(resp.as_ref())?;
+    build_project_from_example("default", name)?;
     Ok(())
 }
 
 fn example(name: &str)  -> Result<(), Box<dyn std::error::Error>>{
-    //DLing & extracting example zip
-    let download_url = format!("{}{}{}{}", GIT_URL, "/raw/main/examples/", name, "/content.zip");
-    let resp = reqwest::blocking::get(download_url)?.bytes()?;
-    let mut zip = zip::ZipArchive::new(std::io::Cursor::new(resp))?;
-    zip.extract(std::path::PathBuf::from(name))?;
-
-
-    //DLing redistributable server binary
-    let download_url = format!("{}{}", GIT_URL, "/raw/main/exec/tailor-server-redis");
-    let resp = reqwest::blocking::get(download_url)?.bytes()?;
-    let mut file = File::create(format!("{}/tailor-server-redis", name))?;
-    file.write(resp.as_ref())?;
+    build_project_from_example(name, name)?;
     Ok(())
 }
 
 fn publish() -> Result<(), Box<dyn std::error::Error>> {
+    Ok(())
+}
+
+fn build_project_from_example(example_name: &str, target_folder: &str) -> Result<(), Box<dyn std::error::Error>> {
+    //DLing & extracting example zip
+    println!("Downloading example \"{}\" from {}", example_name, GIT_URL);
+    let download_url = format!("{}{}{}{}", GIT_URL, "/raw/main/examples/", example_name, "/content.zip");
+    let resp = reqwest::blocking::get(download_url)?.bytes()?;
+    let mut zip = zip::ZipArchive::new(std::io::Cursor::new(resp))?;
+    let mut target_path = PathBuf::from(target_folder);
+    println!("Extracting into {}...", target_folder);
+    zip.extract(target_path.clone())?;
+
+
+    //Copying server binary
+    println!("Copying server binary...");
+    let mut source_path = current_exe()?;
+    let tailor_server_path = PathBuf::from("tailor-server");
+    source_path.pop();
+    source_path.push(tailor_server_path.clone());
+    target_path.push(tailor_server_path);
+    println!("{:?} : {:?}", source_path, target_path);
+    copy(source_path, target_path)?;
     Ok(())
 }
