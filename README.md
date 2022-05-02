@@ -1,7 +1,7 @@
 # Tailor
 The Tailor project is a suite of powertools for NFT metadata and front-end creation and management. It currently has 2 components :
-* `tailor-server-redis` : a project-agnostic redistributable template-based HTTP server.
-* `tailor-cli` : a simple utility that will generate and ([eventually](#roadmap)) publish NFT projects based on `tailor-server-redis`.
+* `tailor-server` : a project-agnostic template-based HTTP server for NFT metadata and static and dynamic front-end.
+* `tailor-cli` : a simple utility that will generate and ([eventually](#roadmap)) publish NFT projects based on `tailor-server`.
 
 ## Disclaimer
 This project is by no means completed and most its features are still being fleshed out.
@@ -29,7 +29,7 @@ tailor-cli example static-pictures
 ```
 
 In this new project, you will find :
-* `tailor-server-redis` : the http server binary. It will listen at address `0.0.0.0` on port `8080`.
+* `tailor-server` : the http server binary. It will listen at address `0.0.0.0` on port `8080`.
 * `static` : a folder that will hold all your static content. This can include thumbnails, pre-generated monkey jpegs, logos and icons or even a full build of a react or vue  project.
 * `templates` : a folder that **MUST** contain 2 files :
   * `metadata.json.hbs` : a json template containing the list of all the metadata for all your tokens.
@@ -38,14 +38,14 @@ In this new project, you will find :
 To start the server, simply do :
 ```shell
 cd hello-world
-./tailor-server-redis
+./tailor-server
 ```
 Then to access your metadata (declared in the `templates/metadata.json.hbs` file), navigate to [http://localhost:8080/metadata/0](http://localhost:8080/metadata/0).<br>
 To view an NFT's dynamic front-end (declared in the `templates/nft.html.hbs` file), go to [http://localhost:8080/?id=0](http://localhost:8080/?id=0).<br>
 To view static content, go to [http://localhost:8080/](http://localhost:8080/) followed by the file path within the `static` folder (e.g [/0.png](http://localhost:8080/0.png) for the default example).
 
 ## Usage
-`tailor-cli` is a command line tool to dynamically create dynamic NFT environments based on the `tailor-server-redis` binary.<br>
+`tailor-cli` is a command line tool to dynamically create dynamic NFT environments based on the `tailor-server` binary.<br>
 ```shell
 $ tailor-cli --help
 tailor-cli 0.1.0
@@ -60,12 +60,12 @@ OPTIONS:
 
 SUBCOMMANDS:
     example    Generate a new server directory from a pre-existing example To then run the
-                   server, simply run the tailor-server-redis executable. On UNIX systems, add
-                   executable permissions to tailor-server-redis
+                   server, simply run the tailor-server executable. On UNIX systems, add
+                   executable permissions to tailor-server
     help       Print this message or the help of the given subcommand(s)
     init       Initialize a new distributable server directory. To then run the server, simply
-                   run the tailor-server-redis executable. On UNIX systems, add executable
-                   permissions to tailor-server-redis
+                   run the tailor-server executable. On UNIX systems, add executable
+                   permissions to tailor-server
     publish    Publish a server NOT YET IMPLEMENTED Eventually will allow to publish metadata
                    and NFTs to either Aleph, IPFS or Arweave
 ```
