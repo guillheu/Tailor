@@ -1,13 +1,17 @@
 extern crate clap;
 extern crate reqwest;
+extern crate rs_docker;
 
 use clap::{Parser, Subcommand};
+use rs_docker::Docker;
+use rs_docker::container::{ContainerCreate, HostConfigCreate};
 use std::fs::copy;
 use std::env::current_exe;
 use std::path::PathBuf;
 
 
-
+static TAILOR_SERVER_DOCKER_REPO: &'static str = "tailor-server";
+static TAILOR_SERVER_DEFAULT_DOCKER_TAG: &'static str = "dev";
 static GIT_URL: &'static str = "https://github.com/guillheu/Tailor";
 
 
@@ -32,6 +36,7 @@ enum Commands{
     /// NOT YET IMPLEMENTED
     /// Eventually will allow to publish metadata and NFTs to either Aleph, IPFS or Arweave
     Publish,
+    Debug,
 }
 
 
@@ -45,12 +50,35 @@ struct Cli {
 
 
 
+fn debug() -> Result<(), Box<dyn std::error::Error>> {
+    let mut docker = Docker::connect("unix:///var/run/docker.sock")?;
+    docker.create_image(TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG)?;
+    let exposed_ports = docker.inspect_image(&format!("{}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG))?.ContainerConfig.ExposedPorts.unwrap();
+    println!("{:#?}", exposed_ports);
+    // let host_config_create = HostConfigCreate{
+    //     NetworkMode: Some("bridge".to_string()),
+    //     PublishAllPorts: Some(false),
+
+    // }
+    // let container_create = ContainerCreate{
+    //     Image: format!("{}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG),
+    //     Labels: None,
+    //     ExposedPorts: None,
+    //     HostConfig: None,
+    // };
+    // docker.create_container("testing".to_string(), container_create)?;
+    // docker.start_container("testing")?;
+    Ok(())
+}
+
 fn main() {
+
     let args = Cli::parse();
     let result = match args.command {
         Commands::Init{folder_name: n}      => (init(&n)),
         Commands::Example{example_name: n}   => example(&n),
         Commands::Publish   => publish(),
+        Commands::Debug     => debug(),
     };
     if result.is_err() {
         println!("Invalid input : {:?}", result.err());
