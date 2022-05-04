@@ -4,16 +4,15 @@ extern crate rs_docker;
 
 use clap::{Parser, Subcommand};
 use rs_docker::Docker;
-use rs_docker::container::{ContainerCreate, HostConfigCreate, PortBinding};
-use std::fs::copy;
-use std::env::current_exe;
+use rs_docker::container::{ContainerCreate, HostConfigCreate, PortBinding, Mount};
+use std::fs::{create_dir_all};
+use std::env::{current_dir};
 use std::path::PathBuf;
 use std::collections::HashMap;
 
 
 static TAILOR_SERVER_DOCKER_REPO: &'static str = "guillh/tailor-server";
 static TAILOR_SERVER_DEFAULT_DOCKER_TAG: &'static str = "0.1.1";
-static GIT_URL: &'static str = "https://github.com/guillheu/Tailor";
 
 
 #[derive(Debug, Subcommand)]
@@ -37,7 +36,6 @@ enum Commands{
     /// NOT YET IMPLEMENTED
     /// Eventually will allow to publish metadata and NFTs to either Aleph, IPFS or Arweave
     Publish,
-    Debug,
 }
 
 
@@ -51,32 +49,6 @@ struct Cli {
 
 
 
-fn debug() -> Result<(), Box<dyn std::error::Error>> {
-    let local_folder = String::from("testing");
-    let host_port = String::from("8080");
-    let mut docker = Docker::connect("unix:///var/run/docker.sock")?;
-    docker.create_image(TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG)?;
-    let exposed_ports = docker.inspect_image(&format!("{}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG))?.ContainerConfig.ExposedPorts.unwrap();
-    let port_binding = PortBinding{HostIp: None, HostPort: host_port};
-    let mut port_bindings = HashMap::<String, Vec<PortBinding>>::new();
-    port_bindings.insert(exposed_ports.keys().last().unwrap().clone(), vec![port_binding]);
-    let host_config_create = HostConfigCreate{
-        NetworkMode: Some("bridge".to_string()),
-        PublishAllPorts: Some(false),
-        PortBindings: Some(port_bindings),
-        AutoRemove: true,
-    };
-    let container_create = ContainerCreate{
-        Image: format!("{}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG),
-        Labels: None,
-        ExposedPorts: None,
-        HostConfig: Some(host_config_create),
-    };
-    docker.create_container("testing".to_string(), container_create)?;
-    docker.start_container("testing")?;
-    Ok(())
-}
-
 fn main() {
 
     let args = Cli::parse();
@@ -84,7 +56,6 @@ fn main() {
         Commands::Init{folder_name: n}      => (init(&n)),
         Commands::Example{example_name: n}   => example(&n),
         Commands::Publish   => publish(),
-        Commands::Debug     => debug(),
     };
     if result.is_err() {
         println!("Invalid input : {:?}", result.err());
@@ -106,24 +77,39 @@ fn publish() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn build_project_from_example(example_name: &str, target_folder: &str) -> Result<(), Box<dyn std::error::Error>> {
-    //DLing & extracting example zip
-    println!("Downloading example \"{}\" from {}", example_name, GIT_URL);
-    let download_url = format!("{}{}{}{}", GIT_URL, "/raw/main/examples/", example_name, "/content.zip");
-    let resp = reqwest::blocking::get(download_url)?.bytes()?;
-    let mut zip = zip::ZipArchive::new(std::io::Cursor::new(resp))?;
-    let mut target_path = PathBuf::from(target_folder);
-    println!("Extracting into {}...", target_folder);
-    zip.extract(target_path.clone())?;
-
-
-    //Copying server binary
-    println!("Copying server binary...");
-    let mut source_path = current_exe()?;
-    let tailor_server_path = PathBuf::from("tailor-server");
-    source_path.pop();
-    source_path.push(tailor_server_path.clone());
-    target_path.push(tailor_server_path);
-    println!("{:?} : {:?}", source_path, target_path);
-    copy(source_path, target_path)?;
+    create_dir_all(PathBuf::from(target_folder.clone()))?;
+    let host_port = String::from("8080");
+    let mut docker = Docker::connect("unix:///var/run/docker.sock")?;
+    docker.create_image(TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG)?;
+    let exposed_ports = docker.inspect_image(&format!("{}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG))?.ContainerConfig.ExposedPorts.unwrap();
+    let port_binding = PortBinding{HostIp: None, HostPort: host_port};
+    let mut port_bindings = HashMap::<String, Vec<PortBinding>>::new();
+    port_bindings.insert(exposed_ports.keys().last().unwrap().clone(), vec![port_binding]);
+    let mount = Mount{
+        Target: "/mnt".to_string(),
+        Source: format!("{}{}{}", current_dir()?.to_str().unwrap(), "/", target_folder),
+        Type: "bind".to_string(),
+        ReadOnly: false,
+        Consistency: None,
+        BindOptions: None,
+        VolumeOptions: None,
+        TmpfsOptions: None,
+    };
+    let host_config_create = HostConfigCreate{
+        NetworkMode: Some("bridge".to_string()),
+        PublishAllPorts: Some(false),
+        PortBindings: Some(port_bindings),
+        AutoRemove: true,
+        Mounts: Some(vec![mount]),
+    };
+    let container_create = ContainerCreate{
+        Image: format!("{}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG),
+        Labels: None,
+        ExposedPorts: None,
+        HostConfig: Some(host_config_create),
+        Entrypoint: Some(vec!["/bin/sh".to_string(), "-c".to_string(), format!("{}{}{}", "cp -r ../examples/", example_name, "/* /mnt")]),
+    };
+    docker.create_container("testing".to_string(), container_create)?;
+    docker.start_container("testing")?;
     Ok(())
 }

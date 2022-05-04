@@ -1515,7 +1515,7 @@ dependencies = [
 [[package]]
 name = "rs-docker"
 version = "0.0.60"
-source = "git+https://gitlab.com/xXxDantexXx/rust-docker/#f6f7ee39ca8a771edac8eccf29a471ed7d7b21c4"
+source = "git+https://gitlab.com/xXxDantexXx/rust-docker/#ecda9e6434a7d1bca3b74cd961f824070a92d0e1"
 dependencies = [
  "futures",
  "hyper",
