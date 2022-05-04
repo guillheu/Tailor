@@ -13,9 +13,10 @@ RUN useradd -m tailor
 WORKDIR /home/tailor/tailor-server/serve
 COPY --from=build /root/tailor-server/target/release/tailor-server .
 COPY examples ../examples
-RUN chown tailor ./tailor-server
+COPY examples/default .
+RUN chown -R tailor ..
 USER tailor
 
 EXPOSE 8080
 
-ENTRYPOINT ["/home/tailor/tailor-server/tailor-server"]
+ENTRYPOINT ["/home/tailor/tailor-server/serve/tailor-server"]

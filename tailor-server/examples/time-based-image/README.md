@@ -1,3 +1,0 @@
-# Time-based-images
-This example shows how to use timestamps in your font-end to change a picture.<br>
-**/!\\ATTENTION/!\\** the `image` field in the metadata is still **static**. This is because of the limitations of Handlebars which does not let us natively compare values, meaning we cannot dynamically assign an image url based on a timestamp in the metadata. This is some of the motivation behind our decision to [move to Tera for templating in the future](/README.md#roadmap).

@@ -4,14 +4,15 @@ extern crate rs_docker;
 
 use clap::{Parser, Subcommand};
 use rs_docker::Docker;
-use rs_docker::container::{ContainerCreate, HostConfigCreate};
+use rs_docker::container::{ContainerCreate, HostConfigCreate, PortBinding};
 use std::fs::copy;
 use std::env::current_exe;
 use std::path::PathBuf;
+use std::collections::HashMap;
 
 
-static TAILOR_SERVER_DOCKER_REPO: &'static str = "tailor-server";
-static TAILOR_SERVER_DEFAULT_DOCKER_TAG: &'static str = "dev";
+static TAILOR_SERVER_DOCKER_REPO: &'static str = "guillh/tailor-server";
+static TAILOR_SERVER_DEFAULT_DOCKER_TAG: &'static str = "0.1.1";
 static GIT_URL: &'static str = "https://github.com/guillheu/Tailor";
 
 
@@ -51,23 +52,28 @@ struct Cli {
 
 
 fn debug() -> Result<(), Box<dyn std::error::Error>> {
+    let local_folder = String::from("testing");
+    let host_port = String::from("8080");
     let mut docker = Docker::connect("unix:///var/run/docker.sock")?;
     docker.create_image(TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG)?;
     let exposed_ports = docker.inspect_image(&format!("{}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG))?.ContainerConfig.ExposedPorts.unwrap();
-    println!("{:#?}", exposed_ports);
-    // let host_config_create = HostConfigCreate{
-    //     NetworkMode: Some("bridge".to_string()),
-    //     PublishAllPorts: Some(false),
-
-    // }
-    // let container_create = ContainerCreate{
-    //     Image: format!("{}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG),
-    //     Labels: None,
-    //     ExposedPorts: None,
-    //     HostConfig: None,
-    // };
-    // docker.create_container("testing".to_string(), container_create)?;
-    // docker.start_container("testing")?;
+    let port_binding = PortBinding{HostIp: None, HostPort: host_port};
+    let mut port_bindings = HashMap::<String, Vec<PortBinding>>::new();
+    port_bindings.insert(exposed_ports.keys().last().unwrap().clone(), vec![port_binding]);
+    let host_config_create = HostConfigCreate{
+        NetworkMode: Some("bridge".to_string()),
+        PublishAllPorts: Some(false),
+        PortBindings: Some(port_bindings),
+        AutoRemove: true,
+    };
+    let container_create = ContainerCreate{
+        Image: format!("{}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG),
+        Labels: None,
+        ExposedPorts: None,
+        HostConfig: Some(host_config_create),
+    };
+    docker.create_container("testing".to_string(), container_create)?;
+    docker.start_container("testing")?;
     Ok(())
 }
 
