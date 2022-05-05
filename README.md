@@ -1,14 +1,15 @@
 # Tailor
 The Tailor project is a suite of powertools for NFT metadata and front-end creation and management. It currently has 2 components :
+* `tailor-cli` : a docker-based utility that will generate and ([eventually](#roadmap)) publish NFT projects based on `tailor-server`.
 * `tailor-server` : a project-agnostic template-based HTTP server for NFT metadata and static and dynamic front-end.
-* `tailor-cli` : a simple utility that will generate and ([eventually](#roadmap)) publish NFT projects based on `tailor-server`.
 
 ## Disclaimer
 This project is by no means completed and most its features are still being fleshed out.
-Currently only supported on linux. Your mileage may vary on other platforms.
+Currently only supported on linux x86. Your mileage may vary on other platforms.
 
 ## Requirements
-Cargo is required to install `tailor-cli`
+Cargo is currently required to install `tailor-cli`.<br>
+Docker is required to run `tailor-cli`.
 
 ## Installation
 ```shell
@@ -23,23 +24,22 @@ To start a new project called `hello-world`, run :
 tailor-cli init hello-world
 ```
 This will create a new `hello-world` folder with a copy of a functional default example.<br>
-Alternatively, you can view other examples by using the `example` subcommand, and then entering a name corresponding to one of the folders [in the examples folder](./examples). For instance :
+Alternatively, you can view other examples by using the `example` subcommand, and then entering a name corresponding to one of the folders [in the examples folder](./tailor-server/examples). For instance :
 ```shell
 tailor-cli example static-pictures
 ```
 
 In this new project, you will find :
-* `tailor-server` : the http server binary. It will listen at address `0.0.0.0` on port `8080`.
 * `static` : a folder that will hold all your static content. This can include thumbnails, pre-generated monkey jpegs, logos and icons or even a full build of a react or vue  project.
 * `templates` : a folder that **MUST** contain 2 files :
   * `metadata.json.hbs` : a json template containing the list of all the metadata for all your tokens.
   * `nft.html.hbs` : an html template of the dynamic front-end for your NFTs. This will be templatized based on the attributes of your NFT metadatas.
 
-To start the server, simply do :
+To start the server, simply run the `tailor-cli start` command :
 ```shell
-cd hello-world
-./tailor-server
+tailor-cli start
 ```
+
 Then to access your metadata (declared in the `templates/metadata.json.hbs` file), navigate to [http://localhost:8080/metadata/0](http://localhost:8080/metadata/0).<br>
 To view an NFT's dynamic front-end (declared in the `templates/nft.html.hbs` file), go to [http://localhost:8080/?id=0](http://localhost:8080/?id=0).<br>
 To view static content, go to [http://localhost:8080/](http://localhost:8080/) followed by the file path within the `static` folder (e.g [/0.png](http://localhost:8080/0.png) for the default example).
@@ -48,7 +48,7 @@ To view static content, go to [http://localhost:8080/](http://localhost:8080/) f
 `tailor-cli` is a command line tool to dynamically create dynamic NFT environments based on the `tailor-server` binary.<br>
 ```shell
 $ tailor-cli --help
-tailor-cli 0.1.0
+tailor-cli 0.2.0
 CLI tool for the development and deployment of static and dynamic NFT metadata and servers
 
 USAGE:
@@ -59,15 +59,14 @@ OPTIONS:
     -V, --version    Print version information
 
 SUBCOMMANDS:
-    example    Generate a new server directory from a pre-existing example To then run the
-                   server, simply run the tailor-server executable. On UNIX systems, add
-                   executable permissions to tailor-server
+    example    Generate a new project from a pre-existing example
     help       Print this message or the help of the given subcommand(s)
-    init       Initialize a new distributable server directory. To then run the server, simply
-                   run the tailor-server executable. On UNIX systems, add executable
-                   permissions to tailor-server
+    init       Initialize a new project
     publish    Publish a server NOT YET IMPLEMENTED Eventually will allow to publish metadata
                    and NFTs to either Aleph, IPFS or Arweave
+    start      Start the server
+    stop       Stop the currently running server
+
 ```
 
 ## Templating
