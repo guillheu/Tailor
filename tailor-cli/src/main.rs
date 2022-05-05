@@ -7,7 +7,7 @@ use rs_docker::Docker;
 use rs_docker::container::{ContainerCreate, HostConfigCreate, PortBinding, Mount};
 use std::fs::{create_dir_all};
 use std::env::{current_dir};
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use std::collections::HashMap;
 
 
@@ -32,6 +32,7 @@ enum Commands{
         /// Name of the example
         example_name: String,
     },
+    // Start,
     /// Publish a server
     /// NOT YET IMPLEMENTED
     /// Eventually will allow to publish metadata and NFTs to either Aleph, IPFS or Arweave
@@ -58,7 +59,10 @@ fn main() {
         Commands::Publish   => publish(),
     };
     if result.is_err() {
-        println!("Invalid input : {:?}", result.err());
+        println!("Error: {}", result.err().unwrap().as_ref());
+    }
+    else {
+        println!("Success!");
     }
 }
 
@@ -77,15 +81,14 @@ fn publish() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn build_project_from_example(example_name: &str, target_folder: &str) -> Result<(), Box<dyn std::error::Error>> {
+    println!("Creating {} directory...", target_folder);
+    if Path::new(target_folder).is_dir() {
+
+        return Result::Err(Box::new(std::io::Error::new(std::io::ErrorKind::InvalidInput, "directory already exists".to_string())));
+    }
     create_dir_all(PathBuf::from(target_folder.clone()))?;
-    let host_port = String::from("8080");
-    let mut docker = Docker::connect("unix:///var/run/docker.sock")?;
-    docker.create_image(TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG)?;
-    let exposed_ports = docker.inspect_image(&format!("{}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG))?.ContainerConfig.ExposedPorts.unwrap();
-    let port_binding = PortBinding{HostIp: None, HostPort: host_port};
-    let mut port_bindings = HashMap::<String, Vec<PortBinding>>::new();
-    port_bindings.insert(exposed_ports.keys().last().unwrap().clone(), vec![port_binding]);
-    let mount = Mount{
+
+    run_container(None, Some(vec![Mount{
         Target: "/mnt".to_string(),
         Source: format!("{}{}{}", current_dir()?.to_str().unwrap(), "/", target_folder),
         Type: "bind".to_string(),
@@ -94,22 +97,47 @@ fn build_project_from_example(example_name: &str, target_folder: &str) -> Result
         BindOptions: None,
         VolumeOptions: None,
         TmpfsOptions: None,
+    }]), Some(vec!["/bin/sh".to_string(), "-c".to_string(), format!("{}{}{}", "cp -r ../examples/", example_name, "/* /mnt")]))?;
+    Ok(())
+}
+
+
+
+fn run_container(port_binding: Option<PortBinding>, mounts: Option<Vec<Mount>>, entrypoint_override: Option<Vec<String>>) -> Result<(), Box<dyn std::error::Error>> {
+    let container_name = String::from("tailor-server_managed");
+    println!("Connecting to docker daemon...");
+    let mut docker = Docker::connect("unix:///var/run/docker.sock")?;
+    println!("Fetching image {}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG);
+    docker.create_image(TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG)?;
+
+
+    let port_bindings = match port_binding {
+        Some(binding)  => {
+            let mut port_bindings = HashMap::<String, Vec<PortBinding>>::new();
+            let exposed_ports = docker.inspect_image(&format!("{}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG))?.ContainerConfig.ExposedPorts.unwrap();
+            port_bindings.insert(exposed_ports.keys().last().unwrap().clone(), vec![binding]);
+            Some(port_bindings)
+        },
+        None        => None,
     };
+
     let host_config_create = HostConfigCreate{
         NetworkMode: Some("bridge".to_string()),
         PublishAllPorts: Some(false),
-        PortBindings: Some(port_bindings),
+        PortBindings: port_bindings,
         AutoRemove: true,
-        Mounts: Some(vec![mount]),
+        Mounts: mounts,
     };
     let container_create = ContainerCreate{
         Image: format!("{}:{}", TAILOR_SERVER_DOCKER_REPO, TAILOR_SERVER_DEFAULT_DOCKER_TAG),
         Labels: None,
         ExposedPorts: None,
         HostConfig: Some(host_config_create),
-        Entrypoint: Some(vec!["/bin/sh".to_string(), "-c".to_string(), format!("{}{}{}", "cp -r ../examples/", example_name, "/* /mnt")]),
+        Entrypoint: entrypoint_override,
     };
-    docker.create_container("testing".to_string(), container_create)?;
-    docker.start_container("testing")?;
+    println!("Creating ephemeral container {}", &container_name);
+    docker.create_container(container_name.clone(), container_create)?;
+    println!("Starting container {}", &container_name);
+    docker.start_container(&container_name)?;
     Ok(())
 }
