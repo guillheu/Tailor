@@ -33,7 +33,7 @@ pipelines:
                 arguments:
                 - build
                 - -t
-                - $TAILOR_SERVER_DOCKERHUB_REPO:$TAILOR_SERVER_IMAGE_TAG
+                - ${TAILOR_SERVER_DOCKERHUB_REPO}:${TAILOR_SERVER_IMAGE_TAG}
                 - ./tailor-server
                 command: docker
                 run_if: passed
@@ -41,15 +41,15 @@ pipelines:
                 arguments:
                 - login 
                 - -u 
-                - $DOCKERHUB_USERNAME
+                - ${DOCKERHUB_USERNAME}
                 - -p
-                - $DOCKERHUB_PWD
+                - ${DOCKERHUB_PWD}
                 command: docker
                 run_if: passed
             - exec:
                 arguments:
                 - push
                 - -t
-                - $TAILOR_SERVER_DOCKERHUB_REPO:$TAILOR_SERVER_IMAGE_TAG
+                - ${TAILOR_SERVER_DOCKERHUB_REPO}:${TAILOR_SERVER_IMAGE_TAG}
                 command: docker
                 run_if: passed
