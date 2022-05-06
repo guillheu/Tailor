@@ -31,19 +31,19 @@ pipelines:
             tasks:
             - exec:
                 arguments:
-                - login 
-                - -u 
-                - $DOCKERHUB_USERNAME
-                - -password
-                - $DOCKERHUB_PWD
-                command: docker
-                run_if: passed
-            - exec:
-                arguments:
                 - build
                 - -t
                 - $TAILOR_SERVER_DOCKERHUB_REPO:$TAILOR_SERVER_IMAGE_TAG
                 - ./tailor-server
+                command: docker
+                run_if: passed
+            - exec:
+                arguments:
+                - login 
+                - -u 
+                - $DOCKERHUB_USERNAME
+                - -p
+                - $DOCKERHUB_PWD
                 command: docker
                 run_if: passed
             - exec:
