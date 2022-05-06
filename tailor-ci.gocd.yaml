@@ -1,0 +1,50 @@
+format_version: 10
+pipelines:
+  tailor-ci:
+    group: rust-docker
+    label_template: ${COUNT}
+    lock_behavior: none
+    display_order: -1
+    materials:
+      git-7f7feba:
+        git: https://github.com/guillheu/Tailor.git
+        shallow_clone: false
+        auto_update: true
+        branch: main
+    stages:
+    - server:
+        fetch_materials: true
+        keep_artifacts: false
+        clean_workspace: false
+        approval:
+          type: success
+          allow_only_on_success: false
+        jobs:
+          build-publish:
+            timeout: 0
+            environment_variables:
+              TAILOR_SERVER_DOCKERHUB_REGISTRY: guillh/tailor-server
+              TAILOR_SERVER_DOCKERHUB_TAG: 0.1.1
+              DOCKERHUB_USER: guillh
+            tasks:
+            - exec:
+                arguments:
+                - build
+                - -t
+                - $TAILOR_SERVER_DOCKERHUB_REGISTRY:TAILOR_SERVER_DOCKERHUB_TAG
+                - ./tailor-server
+                command: docker
+                run_if: passed
+            - exec:
+                arguments:
+                - -c
+                - echo -n $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USER --password-stdin
+                command: sh
+                run_if: passed
+            - exec:
+                arguments:
+                - push
+                - guillh
+                - $TAILOR_SERVER_DOCKERHUB_REGISTRY:TAILOR_SERVER_DOCKERHUB_TAG
+                command: docker
+                run_if: passed
