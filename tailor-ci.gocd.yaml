@@ -31,9 +31,12 @@ pipelines:
             tasks:
             - exec:
                 arguments:
-                - -c
-                - echo $DOCKERHUB_PWD | docker login -u $DOCKERHUB_USERNAME --password-stdin
-                command: sh
+                - login 
+                - -u 
+                - $DOCKERHUB_USERNAME
+                - -password
+                - $DOCKERHUB_PWD
+                command: docker
                 run_if: passed
             - exec:
                 arguments:
