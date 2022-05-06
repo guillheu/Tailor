@@ -131,7 +131,7 @@ I treasure any and all feedback, as a newbie Rust developper and NFT maker. If y
 Please check the [roadmap](#roadmap) for any missing feature, or open an issue !
 
 ## Roadmap
-* Adding ARM container images (M1 Macs) => Implement a CI
+* Adding ARM container images (M1 Macs)
 * Adding Aleph publishing
 * Migrating from Handlebars to Tera which is much more featureful, including native math and comparison helpers.
 * Adding config file (for port, address, default blockchain & contract address...)
