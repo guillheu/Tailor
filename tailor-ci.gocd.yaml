@@ -32,18 +32,12 @@ pipelines:
             - exec:
                 arguments:
                 - -c
-                - docker build -t $TAILOR_SERVER_DOCKERHUB_REPO:$TAILOR_SERVER_IMAGE_TAG ./tailor-server
-                command: /bin/sh
-                run_if: passed
-            - exec:
-                arguments:
-                - -c
                 - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PWD
                 command: /bin/sh
                 run_if: passed
             - exec:
                 arguments:
                 - -c
-                - docker push $TAILOR_SERVER_DOCKERHUB_REPO:$TAILOR_SERVER_IMAGE_TAG
+                - docker buildx build -t docker.io/$TAILOR_SERVER_DOCKERHUB_REPO:TAILOR_SERVER_IMAGE_TAG --push --platform=linux/arm64,linux/amd64 ./tailor-server
                 command: /bin/sh
                 run_if: passed
