@@ -27,7 +27,7 @@ pipelines:
               TAILOR_SERVER_DOCKERHUB_REPO: guillh/tailor-server
               TAILOR_SERVER_IMAGE_TAG: 0.1.1
             secure_variables:
-              DOCKERHUB_PWD: AES:yVTsy7IH5jpQqJEsyAJEpg==:pJt6aDdZ7tmhb9thhlW/94Nman6VWikOxrdhCBhmA4RubWqCbmcEWKl1FLyI/OoO
+              DOCKERHUB_PWD: AES:w04x5iuEVQ52mFbieRIOgg==:smQHTdgtxTqx12hfSrnYNH4yIOWgIYtXJshgEy6pgKVHs1D3lulObt26uKVWMgMz
             tasks:
             - exec:
                 arguments:
