@@ -44,6 +44,6 @@ pipelines:
             - exec:
                 arguments:
                 - -c
-                - docker push -t $TAILOR_SERVER_DOCKERHUB_REPO:$TAILOR_SERVER_IMAGE_TAG
+                - docker push $TAILOR_SERVER_DOCKERHUB_REPO:$TAILOR_SERVER_IMAGE_TAG
                 command: /bin/sh
                 run_if: passed
